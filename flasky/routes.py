@@ -14,6 +14,7 @@ posts = []
 @app.route('/')
 @app.route('/home')
 def home():
+    # Display all posts
     posts = Post.query.all()
     return render_template('home.html', posts=posts, date=date.today().strftime('%Y-%m-%d'))
 
@@ -26,9 +27,11 @@ def about():
 # Registration
 @app.route('/register', methods=['GET','POST'])
 def register():
-
+    # If navigated to while already logged in
     if(current_user.is_authenticated):
         return redirect(url_for('home'))
+
+    # Get user information and log to db
     form = registration_form()
     if(form.validate_on_submit()):
         hashed_pass = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
@@ -36,6 +39,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash(f'Account created for {form.username.data}! You can now login!', 'success')
+        # Have the new user log in
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form, date=date.today().strftime('%Y-%m-%d'))
 
@@ -43,10 +47,11 @@ def register():
 # Login
 @app.route('/login', methods=['GET','POST'])
 def login():
-
+    # If navigated to while already logged in
     if(current_user.is_authenticated):
         return redirect(url_for('home'))
 
+    # Get user log in info
     form = login_form()
     if(form.validate_on_submit()):
         user = User.query.filter_by(email=form.email.data).first()
@@ -66,8 +71,9 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-
+# Code for resizing, renaming, and saving new profile picture
 def save_pic(form_picture):
+    # Generate random image name
     rand_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
     pic_name = rand_hex + f_ext
@@ -82,9 +88,9 @@ def save_pic(form_picture):
 @app.route('/account', methods=['GET','POST'])
 @login_required
 def account():
-
     form = update_account_form()
     if(form.validate_on_submit()):
+        # Update picture data if necessary
         if(form.picture.data):
             pic_file = save_pic(form.picture.data)
             current_user.image = pic_file

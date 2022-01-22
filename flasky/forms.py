@@ -6,14 +6,11 @@ from flasky.models import User
 from flask_login import current_user
 
 class registration_form(FlaskForm):
+    
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
-
     email = StringField('Email', validators=[DataRequired(), Email()])
-
     password = PasswordField('Password', validators=[DataRequired(), Length(min=8)])
-
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
@@ -30,11 +27,8 @@ class registration_form(FlaskForm):
 class login_form(FlaskForm):
 
     email = StringField('Email', validators=[DataRequired(), Email()])
-
     password = PasswordField('Password', validators=[DataRequired()])
-
     remember = BooleanField('Remember Me')
-
     submit = SubmitField('Login')
 
 class update_account_form(FlaskForm):
