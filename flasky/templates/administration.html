@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1>Admin Page</h1>
+    <table CELLPADDING='15'>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+        </tr>
+        {% for user in users %}
+          <tr>
+            <td>{{user.username}}</td>
+            <td>{{user.email}}</td>
+          </tr>
+        {% endfor %}
+      </table>
+{% endblock content %}
