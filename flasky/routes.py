@@ -141,6 +141,7 @@ def post(post_id):
 @login_required
 def update_post(post_id):
     post = Post.query.get_or_404(post_id)
+    # Make sure the user is allowed to update
     if post.author != current_user:
         abort(403)
     form = post_form()
@@ -155,11 +156,12 @@ def update_post(post_id):
         form.content.data = post.content
     return render_template('create_post.html', title='Update Post', form=form, legend='Update Post', date=date.today().strftime('%Y-%m-%d'))
 
-
+# Delete Post
 @app.route("/post/<int:post_id>/delete", methods=['POST'])
 @login_required
 def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
+    # Make sure the user is allowed to delete
     if (post.author != current_user and not current_user.admin):
         print(current_user.admin)
         abort(403)
@@ -175,7 +177,7 @@ def announcements():
     posts = Post.query.filter_by(announce=True)
     return render_template('home.html', posts=posts, date=date.today().strftime('%Y-%m-%d'))
 
-
+# Function for sending a password reset email to a user
 def send_reset_email(user):
     token = user.get_reset_token()
     msg = Message('Password Reset Request', sender=app.config['MAIL_USERNAME'], recipients=[user.email])
@@ -195,8 +197,8 @@ def reset_request():
 
     form = request_reset_form()
 
+    # Call send email function
     if(form.validate_on_submit()):
-
         user = User.query.filter_by(email=form.email.data).first()
         send_reset_email(user)
         flash('An email has been sent for resetting your password!', 'info')
@@ -214,9 +216,12 @@ def reset_password(token):
 
     user=User.verify_reset_token(token)
 
+    # Token Invalid
     if(not user):
         flash("Invalid or expired token.",'warning')
         return redirect(url_for('reset_request'))
+
+    # Token Valid, update password form
     form = reset_pass_form()
     if(form.validate_on_submit()):
         hashed_pass = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
@@ -227,17 +232,25 @@ def reset_password(token):
         return redirect(url_for('login'))
     return render_template('reset_password.html', title='Reset Password', date=date.today().strftime('%Y-%m-%d'), form=form)
 
+
+# Error Handlers
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
 
 @app.errorhandler(403)
 def page_not_found(e):
-    return render_template("403.html"), 404
+    return render_template("403.html"), 403
+
+@app.errorhandler(500)
+def page_not_found(e):
+    return render_template("500.html"), 500
 
 
-# Announcement Page
+# User Specific Feed
 @app.route('/user_posts/<user_id>')
 def user_posts(user_id):
+    if(not User.query.filter_by(id=user_id).first()):
+        abort(404)
     posts = Post.query.filter_by(user_id=user_id)
     return render_template('home.html', posts=posts, date=date.today().strftime('%Y-%m-%d'))

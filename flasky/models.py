@@ -21,10 +21,12 @@ class User(db.Model, UserMixin):
     posts = db.relationship('Post', backref='author', lazy=True)                    # Posts made by user
     admin = db.Column(db.Boolean, default=False)                                    # Boolean for admin status
 
+    # Function to create password reset token
     def get_reset_token(self, expires_secs=900):
         s = Serializer(app.config['SECRET_KEY'], expires_secs)
         return s.dumps({'user_id': self.id}).decode('utf-8')
 
+    # Function to verify password reset token
     @staticmethod
     def verify_reset_token(token):
         s = Serializer(app.config['SECRET_KEY'])
