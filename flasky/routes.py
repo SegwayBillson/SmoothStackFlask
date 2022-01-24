@@ -235,3 +235,9 @@ def page_not_found(e):
 def page_not_found(e):
     return render_template("403.html"), 404
 
+
+# Announcement Page
+@app.route('/user_posts/<user_id>')
+def user_posts(user_id):
+    posts = Post.query.filter_by(user_id=user_id)
+    return render_template('home.html', posts=posts, date=date.today().strftime('%Y-%m-%d'))
