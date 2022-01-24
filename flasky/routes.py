@@ -8,6 +8,7 @@ from flasky.forms import registration_form, login_form, update_account_form, pos
 from flasky import app, db, bcrypt, mail
 from datetime import date
 from flask_mail import Message
+from sqlalchemy import text
 
 posts = []
 
@@ -16,7 +17,7 @@ posts = []
 @app.route('/home')
 def home():
     # Display all posts
-    posts = Post.query.all()
+    posts = Post.query.filter().order_by(text('id desc'))
     return render_template('home.html', posts=posts, date=date.today().strftime('%Y-%m-%d'))
 
 # About Page
